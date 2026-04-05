@@ -564,6 +564,66 @@ body {
   margin-top: 10px; font-weight: 600;
 }
 
+/* ═══════════ FAQ ═══════════ */
+.faq-section {
+  background: var(--cream);
+  border-top: 1px solid var(--border);
+}
+
+.faq-category {
+  margin-bottom: 32px;
+}
+
+.faq-category-title {
+  font-size: 0.62rem; letter-spacing: 0.3em;
+  text-transform: uppercase; color: var(--gold);
+  font-weight: 600; margin-bottom: 14px;
+  padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+
+.faq-item {
+  border-bottom: 1px solid var(--border);
+}
+
+.faq-q {
+  width: 100%; padding: 16px 0; border: none; background: none;
+  font-family: 'Playfair Display', serif; font-size: 1rem;
+  font-weight: 500; color: var(--charcoal); text-align: left;
+  cursor: pointer; display: flex; justify-content: space-between;
+  align-items: center; gap: 12px; transition: color 0.2s;
+}
+.faq-q:hover { color: var(--gold); }
+
+.faq-arrow {
+  font-size: 0.7rem; color: var(--gray-light);
+  transition: transform 0.3s; flex-shrink: 0;
+}
+.faq-item.open .faq-arrow { transform: rotate(180deg); }
+
+.faq-a {
+  max-height: 0; overflow: hidden; transition: max-height 0.35s ease, padding 0.35s ease;
+  font-size: 0.85rem; color: var(--gray); line-height: 1.7; font-weight: 300;
+}
+.faq-item.open .faq-a {
+  max-height: 300px; padding-bottom: 16px;
+}
+
+.faq-tbd {
+  font-style: italic; color: var(--gray-light); font-size: 0.8rem;
+}
+
+.faq-contact {
+  text-align: center; margin-top: 40px; padding: 28px;
+  background: var(--cream-mid); border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+.faq-contact p { font-size: 0.85rem; color: var(--gray); margin-bottom: 6px; }
+.faq-contact a {
+  color: var(--gold); text-decoration: none; font-weight: 500;
+  font-size: 0.9rem;
+}
+.faq-contact a:hover { text-decoration: underline; }
+
 /* ═══════════ FOOTER ═══════════ */
 footer {
   text-align: center; padding: 40px 24px;
@@ -580,7 +640,7 @@ footer .gold { color: var(--gold); }
   .table-guests, .guest-grid, .convo-grid { grid-template-columns: 1fr; }
 }
 
-#programme, #guests, #versailles { scroll-margin-top: 56px; }
+#programme, #guests, #versailles, #faq { scroll-margin-top: 56px; }
 html { scroll-behavior: smooth; }
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--cream); }
@@ -597,6 +657,7 @@ html { scroll-behavior: smooth; }
       <a href="#programme" class="top-nav-link" data-section="programme">Programme</a>
       <a href="#guests" class="top-nav-link" data-section="guests">Who's Who</a>
       <a href="#versailles" class="top-nav-link" data-section="versailles">Versailles</a>
+      <a href="#faq" class="top-nav-link" data-section="faq">FAQ</a>
     </div>
   </div>
 </nav>
@@ -614,6 +675,7 @@ html { scroll-behavior: smooth; }
     <a href="#programme" class="nav-pill">Programme</a>
     <a href="#guests" class="nav-pill">Who's Who</a>
     <a href="#versailles" class="nav-pill">Versailles &amp; Art</a>
+    <a href="#faq" class="nav-pill">FAQ</a>
   </div>
 </section>
 
@@ -742,6 +804,90 @@ html { scroll-behavior: smooth; }
           <div class="convo-card"><div class="convo-icon">&#9889;</div><h3>"The paintings around us span 1,300 years"</h3><p>From Clovis's victory at Tolbiac in 496 AD to Napoleon at Wagram in 1809 &mdash; the 33 battle scenes on these walls compress over a millennium into a single room.</p><span class="convo-tag">Gallery Context</span></div>
         </div>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FAQ ═══ -->
+<section class="faq-section" id="faq">
+  <div class="section">
+    <div class="section-header">
+      <p class="section-label">Practical Information</p>
+      <h2 class="section-title">Frequently Asked Questions</h2>
+      <div class="section-rule"></div>
+    </div>
+
+    <div style="max-width:720px; margin:0 auto;">
+
+      <div class="faq-category">
+        <div class="faq-category-title">Guest Access</div>
+        <div class="faq-item">
+          <button class="faq-q">Can I transfer my invitation to someone else?<span class="faq-arrow">&#9660;</span></button>
+          <div class="faq-a faq-tbd">Details coming soon. Please contact the organiser.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q">Can my colleague attend in my place?<span class="faq-arrow">&#9660;</span></button>
+          <div class="faq-a faq-tbd">Details coming soon. Please contact the organiser.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q">Can I bring a guest?<span class="faq-arrow">&#9660;</span></button>
+          <div class="faq-a">Attendance is strictly limited to invited guests and Max ticket holders. Access will only be granted upon presentation of a valid confirmation email and ID.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q">Can I bring a photographer or media team?<span class="faq-arrow">&#9660;</span></button>
+          <div class="faq-a">No external photographers, videographers, or content teams are permitted without prior written approval from the organiser. The event is private and professional media coverage is handled exclusively by the official event team.</div>
+        </div>
+      </div>
+
+      <div class="faq-category">
+        <div class="faq-category-title">RSVP &amp; Confirmation</div>
+        <div class="faq-item">
+          <button class="faq-q">How do I confirm my attendance?<span class="faq-arrow">&#9660;</span></button>
+          <div class="faq-a">Please confirm your attendance via the invitation sent to you by email. A confirmation email will follow upon receipt of your RSVP. Access is reserved for confirmed guests only.</div>
+        </div>
+      </div>
+
+      <div class="faq-category">
+        <div class="faq-category-title">Arrival &amp; Access</div>
+        <div class="faq-item">
+          <button class="faq-q">What time should I arrive?<span class="faq-arrow">&#9660;</span></button>
+          <div class="faq-a faq-tbd">Details coming soon. Doors open at 19:00 for the private tour.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q">How do I get to the Chateau de Versailles?<span class="faq-arrow">&#9660;</span></button>
+          <div class="faq-a">A dedicated shuttle service will be provided from Paris. Full details will be shared shortly.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q">Is parking available at the venue?<span class="faq-arrow">&#9660;</span></button>
+          <div class="faq-a">Parking is not included. Paid public parking is available at Place d'Armes, directly opposite the Chateau, and is accessible 24/7 for cars.</div>
+        </div>
+      </div>
+
+      <div class="faq-category">
+        <div class="faq-category-title">Evening Experience</div>
+        <div class="faq-item">
+          <button class="faq-q">What is the dress code for the evening?<span class="faq-arrow">&#9660;</span></button>
+          <div class="faq-a faq-tbd">Details coming soon. Think elegant evening attire befitting Versailles.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q">Are there special menu options (vegetarian, allergies)?<span class="faq-arrow">&#9660;</span></button>
+          <div class="faq-a faq-tbd">Details coming soon. Dietary requirements will be collected ahead of the event.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q">Is seating assigned?<span class="faq-arrow">&#9660;</span></button>
+          <div class="faq-a">Seating will be partially assigned in advance and guided by our team. Please note that seating arrangements cannot be modified.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q">Is a cloakroom available?<span class="faq-arrow">&#9660;</span></button>
+          <div class="faq-a">Yes, a cloakroom will be available upon arrival for coats and small personal belongings.</div>
+        </div>
+      </div>
+
+      <div class="faq-contact">
+        <p>For any further inquiries, please contact our team at</p>
+        <a href="mailto:vipversailles@parisblockchainweek.com">vipversailles@parisblockchainweek.com</a>
+      </div>
+
     </div>
   </div>
 </section>
@@ -1015,7 +1161,7 @@ setInterval(fetchDashboard, 5 * 60 * 1000);
 const topNav = document.getElementById('topNav');
 const heroSection = document.querySelector('.hero');
 const navLinks = document.querySelectorAll('.top-nav-link');
-const sections = document.querySelectorAll('#programme, #guests, #versailles');
+const sections = document.querySelectorAll('#programme, #guests, #versailles, #faq');
 
 // Show/hide nav based on scroll position
 const navObserver = new IntersectionObserver(entries => {
@@ -1046,6 +1192,14 @@ document.querySelectorAll('.v-tab').forEach(tab => {
     document.querySelectorAll('.v-panel').forEach(p => p.classList.remove('active'));
     tab.classList.add('active');
     document.getElementById('vp-' + tab.dataset.vtab).classList.add('active');
+  });
+});
+
+// FAQ accordion
+document.querySelectorAll('.faq-q').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const item = btn.parentElement;
+    item.classList.toggle('open');
   });
 });
 </script>

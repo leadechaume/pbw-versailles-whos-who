@@ -936,6 +936,19 @@ function setSyncState(state, msg) {
 function parseDashboard(doc) {
   const tables = doc.querySelectorAll('table');
 
+  /* Helper: extract guest names from a drill-row.
+     Dashboard uses <span class="drill-chip"> per guest inside drill-rows.
+     DOMParser doesn't produce \n between inline spans, so we read chips directly
+     and fall back to textContent splitting for forward-compatibility. */
+  function extractNames(cell) {
+    const chips = cell.querySelectorAll('.drill-chip');
+    if (chips.length > 0) {
+      return Array.from(chips).map(c => c.textContent.trim());
+    }
+    // Fallback: split on newlines (in case dashboard structure changes)
+    return cell.textContent.trim().split('\n').map(s => s.trim());
+  }
+
   // TABLE 2 (index 2): Sponsor tables with seating
   const t2 = tables[2];
   if (t2) {
@@ -943,17 +956,22 @@ function parseDashboard(doc) {
     let current = null;
     rows.forEach(r => {
       const cells = Array.from(r.cells);
-      if (cells.length > 1 && cells[0].innerText.trim().startsWith('\u25B6')) {
+      const isToggle = r.classList.contains('drill-toggle') ||
+                       (cells.length > 1 && cells[0].textContent.trim().startsWith('\u25B6'));
+      const isDrill  = r.classList.contains('drill-row') ||
+                       (cells.length === 1 && current);
+      if (isToggle) {
         if (current) sponsorTables.push(current);
         current = {
-          sponsor: cells[0].innerText.trim().replace('\u25B6', '').trim(),
-          tables: cells[2] ? cells[2].innerText.trim() : '1',
+          sponsor: cells[0].textContent.trim().replace('\u25B6', '').trim(),
+          tables: cells[2] ? cells[2].textContent.trim() : '1',
           seats: []
         };
-      } else if (cells.length === 1 && current) {
-        cells[0].innerText.trim().split('\n').forEach(line => {
-          let name = line.replace(/ SPK/g, '').replace(/ ext\./g, '').trim();
-          if (name && name.length > 2 && !name.includes('Empty') && !name.includes('Unnamed') && name !== 'TABLE SEATS') {
+      } else if (isDrill && current) {
+        extractNames(cells[0]).forEach(raw => {
+          let name = raw.replace(/ SPK/g, '').replace(/ ext\./g, '').trim();
+          if (name && name.length > 2 && !name.includes('Empty') && !name.includes('Unnamed')
+              && !/table seats/i.test(name)) {
             current.seats.push(name);
           }
         });
@@ -969,16 +987,21 @@ function parseDashboard(doc) {
     let current = null;
     rows.forEach(r => {
       const cells = Array.from(r.cells);
-      if (cells.length > 1 && cells[0].innerText.trim().startsWith('\u25B6')) {
+      const isToggle = r.classList.contains('drill-toggle') ||
+                       (cells.length > 1 && cells[0].textContent.trim().startsWith('\u25B6'));
+      const isDrill  = r.classList.contains('drill-row') ||
+                       (cells.length === 1 && current);
+      if (isToggle) {
         if (current && current.guests.length > 0) ticketOrgs.push(current);
         current = {
-          org: cells[0].innerText.trim().replace('\u25B6', '').trim(),
+          org: cells[0].textContent.trim().replace('\u25B6', '').trim(),
           guests: []
         };
-      } else if (cells.length >= 1 && current) {
-        cells[0].innerText.trim().split('\n').forEach(line => {
-          const name = line.trim();
-          if (name && name.length > 2 && !name.includes('Unnamed') && !name.includes('ORGANIZATION') && !name.includes('TOTAL')) {
+      } else if (isDrill && current) {
+        extractNames(cells[0]).forEach(raw => {
+          const name = raw.trim();
+          if (name && name.length > 2 && !name.includes('Unnamed')
+              && !name.includes('ORGANIZATION') && !name.includes('TOTAL')) {
             current.guests.push(name);
           }
         });
@@ -991,7 +1014,7 @@ function parseDashboard(doc) {
   const t4 = tables[4];
   if (t4) {
     Array.from(t4.rows).slice(1).forEach(r => {
-      const name = r.cells[0] ? r.cells[0].innerText.replace(/ SPK/g, '').replace(/ ext\./g, '').trim() : '';
+      const name = r.cells[0] ? r.cells[0].textContent.replace(/ SPK/g, '').replace(/ ext\./g, '').trim() : '';
       if (name && name.length > 2) speakerNames.add(name);
     });
   }

@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PBW 2026 — VIP Dinner at Versailles</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream: #FEFBF6;
+  --cream-dark: #F5EFE5;
+  --cream-mid: #FAF6EF;
+  --charcoal: #1A1A1A;
+  --charcoal-light: #333333;
+  --gray: #808080;
+  --gray-light: #B0A89E;
+  --gold: #B8973A;
+  --gold-light: #D4B95E;
+  --gold-pale: rgba(184, 151, 58, 0.08);
+  --gold-border: rgba(184, 151, 58, 0.25);
+  --border: rgba(26, 26, 26, 0.08);
+  --border-strong: rgba(26, 26, 26, 0.15);
+  --radius: 10px;
+  --shadow: 0 2px 20px rgba(0,0,0,0.04);
+  --shadow-hover: 0 8px 40px rgba(0,0,0,0.08);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: var(--cream);
+  color: var(--charcoal);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ═══════════ STICKY NAV ═══════════ */
+.top-nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  background: rgba(254, 251, 246, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 16px;
+  transform: translateY(-100%);
+  transition: transform 0.35s ease;
+}
+
+.top-nav.visible {
+  transform: translateY(0);
+}
+
+.top-nav-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 52px;
+}
+
+.top-nav-brand {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--charcoal);
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.top-nav-links {
+  display: flex;
+  gap: 4px;
+}
+
+.top-nav-link {
+  padding: 6px 14px;
+  border-radius: 50px;
+  color: var(--gray);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.top-nav-link:hover, .top-nav-link.active {
+  color: var(--gold);
+  background: var(--gold-pale);
+}
+
+@media (max-width: 480px) {
+  .top-nav-brand { font-size: 0.8rem; }
+  .top-nav-link { padding: 6px 10px; font-size: 0.62rem; letter-spacing: 0.06em; }
+}
+
+/* ═══════════ HERO ═══════════ */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 60px 24px;
+  background: var(--cream);
+  position: relative;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(ellipse at 50% 40%, rgba(184,151,58,0.04) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.hero-ornament {
+  font-size: 0.7rem;
+  letter-spacing: 1.2em;
+  color: var(--gold);
+  margin-bottom: 40px;
+  opacity: 0.5;
+}
+
+.hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.4rem, 5.5vw, 4.2rem);
+  font-weight: 400;
+  color: var(--charcoal);
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  margin-bottom: 8px;
+}
+
+.hero h1 em {
+  font-style: italic;
+  font-weight: 500;
+}
+
+.hero-sub {
+  font-size: 0.75rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--gray);
+  font-weight: 400;
+  margin-bottom: 48px;
+}
+
+.hero-detail {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem;
+  color: var(--charcoal-light);
+  margin-bottom: 4px;
+  font-weight: 400;
+}
+
+.hero-detail strong {
+  font-weight: 600;
+}
+
+.hero-location {
+  font-size: 0.85rem;
+  color: var(--gray);
+  margin-bottom: 48px;
+}
+
+.hero-rule {
+  width: 50px;
+  height: 1px;
+  background: var(--gold);
+  margin: 0 auto 48px;
+  opacity: 0.5;
+}
+
+/* Nav */
+.nav-pills {
+  display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+}
+
+.nav-pill {
+  padding: 10px 26px;
+  border: 1px solid var(--border-strong);
+  border-radius: 50px;
+  background: transparent;
+  color: var(--charcoal-light);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-decoration: none;
+  font-family: 'Inter', sans-serif;
+}
+
+.nav-pill:hover, .nav-pill.active {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: var(--gold-pale);
+}
+
+/* ═══════════ SECTIONS ═══════════ */
+.section {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 80px 24px;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.section-label {
+  font-size: 0.65rem;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-weight: 500;
+  margin-bottom: 14px;
+}
+
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+  font-weight: 400;
+  color: var(--charcoal);
+  line-height: 1.2;
+}
+
+.section-rule {
+  width: 40px; height: 1px;
+  background: var(--gold);
+  margin: 18px auto 0;
+  opacity: 0.4;
+}
+
+/* ═══════════ PROGRAMME ═══════════ */
+.programme-section {
+  background: var(--cream-mid);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.timeline { max-width: 580px; margin: 0 auto; }
+
+.timeline-item {
+  display: flex; gap: 28px; padding: 22px 0;
+  border-bottom: 1px solid var(--border);
+  align-items: flex-start;
+}
+.timeline-item:last-child { border-bottom: none; }
+
+.timeline-time {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem;
+  font-weight: 500;
+  color: var(--charcoal);
+  min-width: 80px;
+  text-align: right;
+}
+
+.timeline-content h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--charcoal);
+  margin-bottom: 4px;
+}
+
+.timeline-content p {
+  font-size: 0.82rem;
+  color: var(--gray);
+  font-weight: 300;
+  line-height: 1.6;
+}
+
+/* ═══════════ GUESTS ═══════════ */
+.controls {
+  display: flex; flex-wrap: wrap; gap: 10px;
+  margin-bottom: 32px; justify-content: center; align-items: center;
+}
+
+.search-box {
+  flex: 1; min-width: 240px; max-width: 380px;
+  padding: 11px 20px;
+  border: 1px solid var(--border-strong);
+  border-radius: 50px;
+  background: white;
+  color: var(--charcoal);
+  font-size: 0.85rem;
+  font-family: 'Inter', sans-serif;
+  outline: none;
+  transition: border-color 0.3s;
+}
+.search-box::placeholder { color: var(--gray-light); }
+.search-box:focus { border-color: var(--gold); }
+
+.view-toggle {
+  display: flex; gap: 4px;
+  border: 1px solid var(--border-strong);
+  border-radius: 50px; padding: 3px;
+  background: white;
+}
+
+.view-btn {
+  padding: 7px 16px;
+  border: none; border-radius: 50px;
+  background: transparent;
+  color: var(--gray);
+  font-size: 0.72rem; font-weight: 500;
+  letter-spacing: 0.05em; text-transform: uppercase;
+  cursor: pointer; transition: all 0.2s;
+  font-family: 'Inter', sans-serif;
+}
+.view-btn.active { background: var(--charcoal); color: white; }
+
+.guest-count {
+  width: 100%; text-align: center;
+  font-size: 0.78rem; color: var(--gray);
+  margin-bottom: 12px;
+}
+
+/* ── Loading / Sync ── */
+.sync-bar {
+  display: flex; align-items: center; justify-content: center;
+  gap: 8px; margin-bottom: 20px;
+  font-size: 0.72rem; color: var(--gray-light);
+}
+
+.sync-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #4ade80; display: inline-block;
+}
+.sync-dot.loading {
+  background: var(--gold);
+  animation: pulse 1s infinite;
+}
+.sync-dot.error { background: #f87171; }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.loading-skeleton {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--gray-light);
+  font-size: 0.85rem;
+}
+
+.loading-spinner {
+  width: 28px; height: 28px;
+  border: 2px solid var(--border);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 16px;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Table View ── */
+.table-group {
+  margin-bottom: 40px;
+}
+
+.table-header {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 16px; padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.table-sponsor {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.3rem; font-weight: 500;
+  color: var(--charcoal);
+}
+
+.table-badge {
+  font-size: 0.6rem; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--gold);
+  background: var(--gold-pale);
+  border: 1px solid var(--gold-border);
+  padding: 3px 10px; border-radius: 20px;
+  font-weight: 600;
+}
+
+.table-guests {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+/* ── Guest Card ── */
+.guest-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  display: flex; align-items: center; gap: 14px;
+  transition: all 0.3s;
+  cursor: default;
+}
+
+.guest-card:hover {
+  border-color: var(--gold-border);
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-1px);
+}
+
+.guest-photo {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--cream-dark);
+  border: 1px solid var(--border);
+}
+
+.guest-initials {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: var(--cream-dark);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Playfair Display', serif;
+  font-size: 1rem; font-weight: 500;
+  color: var(--gold);
+  flex-shrink: 0;
+}
+
+.guest-info { flex: 1; min-width: 0; }
+
+.guest-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.95rem; font-weight: 500;
+  color: var(--charcoal);
+  line-height: 1.2;
+  margin-bottom: 2px;
+}
+
+.guest-org {
+  font-size: 0.75rem;
+  color: var(--gray);
+  font-weight: 400;
+}
+
+.guest-tag {
+  font-size: 0.58rem; letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 8px; border-radius: 20px;
+  font-weight: 600; display: inline-block;
+  margin-top: 3px;
+}
+.guest-tag.speaker {
+  color: #6B46A5; background: rgba(107,70,165,0.06);
+  border: 1px solid rgba(107,70,165,0.12);
+}
+.guest-tag.sponsor {
+  color: var(--gold); background: var(--gold-pale);
+  border: 1px solid var(--gold-border);
+}
+.guest-tag.ticket {
+  color: var(--gray); background: rgba(0,0,0,0.03);
+  border: 1px solid var(--border);
+}
+
+/* ── Grid View (All guests) ── */
+.guest-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+/* ═══════════ VERSAILLES ═══════════ */
+.versailles-section {
+  background: var(--cream-mid);
+  border-top: 1px solid var(--border);
+}
+
+.v-tabs {
+  display: flex; justify-content: center; gap: 8px;
+  flex-wrap: wrap; margin-bottom: 40px;
+}
+
+.v-tab {
+  padding: 9px 20px;
+  border: 1px solid var(--border-strong);
+  border-radius: 50px;
+  background: transparent;
+  color: var(--gray);
+  font-size: 0.72rem; font-weight: 500;
+  cursor: pointer; transition: all 0.3s;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 0.05em;
+}
+.v-tab:hover, .v-tab.active {
+  border-color: var(--gold); color: var(--gold);
+  background: var(--gold-pale);
+}
+
+.v-content { max-width: 900px; margin: 0 auto; }
+.v-panel { display: none; }
+.v-panel.active { display: block; }
+
+.v-intro {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.15rem;
+  color: var(--charcoal-light);
+  line-height: 1.7;
+  text-align: center;
+  margin-bottom: 40px;
+  max-width: 680px;
+  margin-left: auto; margin-right: auto;
+}
+.v-intro em { color: var(--gold); font-style: italic; }
+
+.convo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 16px;
+}
+
+.convo-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px;
+  transition: all 0.3s;
+}
+.convo-card:hover {
+  border-color: var(--gold-border);
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-1px);
+}
+
+.convo-icon { font-size: 1.5rem; margin-bottom: 10px; }
+
+.convo-card h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.05rem; font-weight: 500;
+  color: var(--charcoal);
+  margin-bottom: 8px; line-height: 1.3;
+}
+
+.convo-card p {
+  font-size: 0.82rem; color: var(--gray);
+  line-height: 1.6; font-weight: 300;
+}
+
+.convo-tag {
+  display: inline-block; font-size: 0.58rem;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--gold); opacity: 0.7;
+  margin-top: 10px; font-weight: 600;
+}
+
+/* ═══════════ FOOTER ═══════════ */
+footer {
+  text-align: center; padding: 40px 24px;
+  border-top: 1px solid var(--border);
+  font-size: 0.7rem; color: var(--gray-light);
+  letter-spacing: 0.08em;
+}
+footer .gold { color: var(--gold); }
+
+/* ═══════════ RESPONSIVE ═══════════ */
+@media (max-width: 640px) {
+  .timeline-item { flex-direction: column; gap: 6px; }
+  .timeline-time { text-align: left; min-width: auto; }
+  .table-guests, .guest-grid, .convo-grid { grid-template-columns: 1fr; }
+}
+
+#programme, #guests, #versailles { scroll-margin-top: 56px; }
+html { scroll-behavior: smooth; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--cream); }
+::-webkit-scrollbar-thumb { background: var(--gold-light); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- ═══ STICKY NAV ═══ -->
+<nav class="top-nav" id="topNav">
+  <div class="top-nav-inner">
+    <a href="#top" class="top-nav-brand">PBW 2026 — Versailles</a>
+    <div class="top-nav-links">
+      <a href="#programme" class="top-nav-link" data-section="programme">Programme</a>
+      <a href="#guests" class="top-nav-link" data-section="guests">Who's Who</a>
+      <a href="#versailles" class="top-nav-link" data-section="versailles">Versailles</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<section class="hero" id="top">
+  <div class="hero-ornament">&#9670; &nbsp; &#9670; &nbsp; &#9670;</div>
+  <h1>The VIP Dinner<br>at the <em>Chateau de Versailles</em></h1>
+  <p class="hero-sub">Paris Blockchain Week 2026</p>
+  <div class="hero-rule"></div>
+  <p class="hero-detail">Tuesday, April 14 &mdash; <strong>7:00 PM &ndash; 11:00 PM</strong> CEST</p>
+  <p class="hero-location">Galerie des Batailles &mdash; Palace of Versailles</p>
+  <br><br>
+  <div class="nav-pills">
+    <a href="#programme" class="nav-pill">Programme</a>
+    <a href="#guests" class="nav-pill">Who's Who</a>
+    <a href="#versailles" class="nav-pill">Versailles &amp; Art</a>
+  </div>
+</section>
+
+<!-- ═══ PROGRAMME ═══ -->
+<section class="programme-section" id="programme">
+  <div class="section">
+    <div class="section-header">
+      <p class="section-label">Programme</p>
+      <h2 class="section-title">A Royal Evening</h2>
+      <div class="section-rule"></div>
+    </div>
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-time">19:00</div>
+        <div class="timeline-content">
+          <h3>Royal Welcome &amp; Private Tour</h3>
+          <p>Exclusive guided tour of the Chateau de Versailles.</p>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-time">19:30</div>
+        <div class="timeline-content">
+          <h3>Champagne Reception</h3>
+          <p>Champagne reception in the palace salons.</p>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-time">20:30</div>
+        <div class="timeline-content">
+          <h3>Opening Remarks</h3>
+          <p>Opening remarks by Paris Blockchain Week 2026.</p>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-time">20:35</div>
+        <div class="timeline-content">
+          <h3>Multi-Course Dining Experience</h3>
+          <p>An exquisite multi-course dining experience in the Galerie des Batailles.</p>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-time">22:45</div>
+        <div class="timeline-content">
+          <h3>Sparkling Finale</h3>
+          <p>A sparkling finale under the night sky and an exclusive first reveal of what comes next.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ WHO'S WHO ═══ -->
+<section id="guests">
+  <div class="section">
+    <div class="section-header">
+      <p class="section-label">Your Fellow Guests</p>
+      <h2 class="section-title">Who's Who</h2>
+      <div class="section-rule"></div>
+    </div>
+    <div class="sync-bar" id="syncBar">
+      <span class="sync-dot loading" id="syncDot"></span>
+      <span id="syncText">Syncing with dashboard...</span>
+    </div>
+    <div class="controls">
+      <input type="text" class="search-box" id="searchInput" placeholder="Search by name or organization...">
+      <div class="view-toggle">
+        <button class="view-btn active" data-view="tables">By Table</button>
+        <button class="view-btn" data-view="all">All Guests</button>
+      </div>
+    </div>
+    <p class="guest-count" id="guestCount"></p>
+    <div id="guestContainer"></div>
+  </div>
+</section>
+
+<!-- ═══ VERSAILLES & ART ═══ -->
+<section class="versailles-section" id="versailles">
+  <div class="section">
+    <div class="section-header">
+      <p class="section-label">Know Your Venue</p>
+      <h2 class="section-title">Versailles &amp; the Gallery of Battles</h2>
+      <div class="section-rule"></div>
+    </div>
+
+    <div class="v-tabs">
+      <button class="v-tab active" data-vtab="gallery">The Gallery of Battles</button>
+      <button class="v-tab" data-vtab="history">Palace History</button>
+      <button class="v-tab" data-vtab="cards">Conversation Cards</button>
+    </div>
+
+    <div class="v-content">
+      <div class="v-panel active" id="vp-gallery">
+        <p class="v-intro">Tonight you dine in the <em>Galerie des Batailles</em> &mdash; the largest room in the entire Chateau, a 120-metre corridor of French military glory inaugurated in 1837.</p>
+        <div class="convo-grid">
+          <div class="convo-card"><div class="convo-icon">&#127979;</div><h3>A Room of Epic Proportions</h3><p>At 120 m long and 13 m wide, the Gallery rivals the Grande Galerie of the Louvre. Designed by architect Frederic Nepveu, it features marble columns, gilded stuccos, and glass ceilings flooding the space with light.</p><span class="convo-tag">Architecture</span></div>
+          <div class="convo-card"><div class="convo-icon">&#128444;</div><h3>33 Monumental Paintings</h3><p>The walls display 33 massive canvases covering 1,300 years of French battles &mdash; from Clovis at Tolbiac (496) to Napoleon at Wagram (1809). Artists include Delacroix and Horace Vernet.</p><span class="convo-tag">Art</span></div>
+          <div class="convo-card"><div class="convo-icon">&#9876;&#65039;</div><h3>A Pantheon of Heroes</h3><p>Beyond the paintings, 80 busts of officers killed in battle line the gallery, alongside bronze plaques bearing the names of princes, marshals, and admirals who fought for France.</p><span class="convo-tag">Heritage</span></div>
+          <div class="convo-card"><div class="convo-icon">&#128081;</div><h3>Louis-Philippe's Masterpiece</h3><p>By including victories from every dynasty &mdash; Merovingians through Bourbons, plus the Revolution and Napoleon &mdash; Louis-Philippe united a divided France under shared military glory.</p><span class="convo-tag">History</span></div>
+          <div class="convo-card"><div class="convo-icon">&#127970;</div><h3>What Stood Here Before</h3><p>Before the gallery, these rooms were private apartments of Philippe I, Duke of Orleans (Louis XIV's brother) and his wife Elizabeth Charlotte of the Palatinate.</p><span class="convo-tag">Anecdote</span></div>
+          <div class="convo-card"><div class="convo-icon">&#127912;</div><h3>Delacroix's Battle of Taillebourg</h3><p>The undisputed masterpiece: Delacroix's dramatic depiction of Louis IX charging across the bridge at Taillebourg in 1242 &mdash; one of the finest battle paintings ever created.</p><span class="convo-tag">Masterpiece</span></div>
+        </div>
+      </div>
+
+      <div class="v-panel" id="vp-history">
+        <p class="v-intro">From a humble hunting lodge to the grandest palace in Europe &mdash; <em>Versailles</em> is 400 years of ambition, art, and political theater condensed into 2,300 rooms.</p>
+        <div class="convo-grid">
+          <div class="convo-card"><div class="convo-icon">&#127795;</div><h3>From Swamp to Splendor</h3><p>In 1623, Louis XIII built a simple hunting lodge on marshy woodland his courtiers mocked. His son Louis XIV transformed it into the most magnificent palace in Europe, moving his entire court here in 1682.</p><span class="convo-tag">Origins</span></div>
+          <div class="convo-card"><div class="convo-icon">&#128142;</div><h3>The Hall of Mirrors</h3><p>357 mirrors line the 73-metre gallery. France lured Venetian mirror-makers (risking death penalties from Venice) to break Italy's monopoly. When lit by 20,000 candles, it became a corridor of infinite light.</p><span class="convo-tag">Icon</span></div>
+          <div class="convo-card"><div class="convo-icon">&#127800;</div><h3>Gardens of Excess</h3><p>The gardens span 800 hectares with 372 statues, 600 fountains, and 20 miles of water pipes. The Trianon flowers were once so intensely fragrant they made guests physically ill.</p><span class="convo-tag">Gardens</span></div>
+          <div class="convo-card"><div class="convo-icon">&#128220;</div><h3>A Treaty That Changed the World</h3><p>On June 28, 1919, the Treaty of Versailles was signed in the Hall of Mirrors, formally ending World War I &mdash; in the very room designed to celebrate French dominance over Europe.</p><span class="convo-tag">World History</span></div>
+          <div class="convo-card"><div class="convo-icon">&#128058;</div><h3>Europe's First Modern Zoo</h3><p>Versailles housed an elaborate menagerie with exotic animals in purpose-built enclosures &mdash; a revolutionary concept that became the model for modern zoological gardens across Europe.</p><span class="convo-tag">Anecdote</span></div>
+          <div class="convo-card"><div class="convo-icon">&#9975;&#65039;</div><h3>The Royal Ice Rink</h3><p>In winter, the Grand Canal froze over and became a spectacular ice-skating rink for the court &mdash; imagine the royals gliding across 1.6 km of ice framed by Le Notre's geometric gardens.</p><span class="convo-tag">Fun Fact</span></div>
+        </div>
+      </div>
+
+      <div class="v-panel" id="vp-cards">
+        <p class="v-intro">Quick-fire facts to spark memorable conversations between courses. Each card is a <em>60-second read</em>.</p>
+        <div class="convo-grid">
+          <div class="convo-card"><div class="convo-icon">&#128161;</div><h3>"Did you know mirrors were once more valuable than gold?"</h3><p>When Louis XIV lined an entire hall with 357 mirrors, he was making the 17th-century equivalent of a billionaire wrapping a building in diamonds. Venice had a total monopoly, and the craftsmen who left risked execution.</p><span class="convo-tag">Icebreaker</span></div>
+          <div class="convo-card"><div class="convo-icon">&#128049;</div><h3>"Louis XV brought his cat to cabinet meetings"</h3><p>While Louis XIV choreographed elaborate court rituals around every daily act, his great-grandson Louis XV preferred the company of his cat during matters of state.</p><span class="convo-tag">Icebreaker</span></div>
+          <div class="convo-card"><div class="convo-icon">&#127758;</div><h3>"Native American diplomats once walked these halls"</h3><p>In 1725, four Native American chiefs and a woman from the Mississippi Valley were received at Versailles on a diplomatic mission, meeting Louis XV in these very rooms.</p><span class="convo-tag">Icebreaker</span></div>
+          <div class="convo-card"><div class="convo-icon">&#128144;</div><h3>"The flowers here once made people faint"</h3><p>The Grand Trianon gardens were planted with such an intensity of fragrant blooms that guests often felt overwhelmed and had to retreat indoors.</p><span class="convo-tag">Icebreaker</span></div>
+          <div class="convo-card"><div class="convo-icon">&#128301;</div><h3>"This gallery was a blockchain before blockchain"</h3><p>Louis-Philippe's Gallery of Battles was essentially an immutable public ledger of French military history &mdash; a permanent, chronological, verifiable record designed to be trusted by all. Sound familiar?</p><span class="convo-tag">Web3 x History</span></div>
+          <div class="convo-card"><div class="convo-icon">&#127915;</div><h3>"5,000 people lived here simultaneously"</h3><p>At its peak, Versailles housed the entire French government, thousands of courtiers, and all their servants. The palace has 2,300 rooms and 67 staircases &mdash; the original co-working space.</p><span class="convo-tag">Icebreaker</span></div>
+          <div class="convo-card"><div class="convo-icon">&#128176;</div><h3>"Versailles cost ~$300 billion in today's money"</h3><p>Adjusted for inflation, the construction of Versailles is estimated to have cost hundreds of billions &mdash; a capital allocation decision that would make any VC pause.</p><span class="convo-tag">Icebreaker</span></div>
+          <div class="convo-card"><div class="convo-icon">&#9889;</div><h3>"The paintings around us span 1,300 years"</h3><p>From Clovis's victory at Tolbiac in 496 AD to Napoleon at Wagram in 1809 &mdash; the 33 battle scenes on these walls compress over a millennium into a single room.</p><span class="convo-tag">Gallery Context</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p><span class="gold">PBW 2026</span> &nbsp;&middot;&nbsp; VIP Dinner at Versailles &nbsp;&middot;&nbsp; Internal Use Only</p>
+</footer>
+
+<script>
+/* ═══════════════════════════════════════════════════
+   LIVE DATA — fetched from the VIP Dinner Dashboard
+   ═══════════════════════════════════════════════════ */
+
+const DASHBOARD_URL = 'https://leadechaume.github.io/vip-dinner-dashboard/';
+
+// Photo handles (static — update manually as needed)
+const photoHandles = {
+  "Adam Back":"adam3us","Ben Zhou":"benabordbinance","Mike Belshe":"mbelshe",
+  "Lukas Enzersdorfer-Konrad":"luaboringmachine","Mathias Imbach":"mathiasimbach",
+  "Catherine Chen":"catcrypto88","Emily Hui":"emilyhui","Greg Schvey":"gaborschvey",
+  "Ulli Spankowski":"ullispankowski","Shane Morand":"shanemorand",
+  "Eric van Miltenburg":"ericvmilt","Seamus Rocca":"seamusrocca",
+  "Mykolas Majauskas":"mmajauskas","Odelia Torteman":"odeliatorteman",
+  "Andrew Rosoman":"arosoman","Alexandre Laizet":"alaizet",
+  "Peter Bain":"peterbain","Jess Houlgrave":"jesshoulgrave",
+  "Kevin Abosch":"kevinabosch","Markus Infanger":"markusinfanger",
+  "Walter Hessert":"walterhessert","Arnaud Simeray":"asimeray",
+  "Neil Batchelor":"neilbatchelor","Tero Reuna":"teroreuna",
+};
+
+// Parsed data (populated by fetch)
+let sponsorTables = [];
+let ticketOrgs = [];
+let speakerNames = new Set();
+
+/* ─── Sync UI ─── */
+const syncDot = document.getElementById('syncDot');
+const syncText = document.getElementById('syncText');
+
+function setSyncState(state, msg) {
+  syncDot.className = 'sync-dot ' + state;
+  syncText.textContent = msg;
+}
+
+/* ─── Parse dashboard HTML ─── */
+function parseDashboard(doc) {
+  const tables = doc.querySelectorAll('table');
+
+  // TABLE 2 (index 2): Sponsor tables with seating
+  const t2 = tables[2];
+  if (t2) {
+    const rows = Array.from(t2.rows);
+    let current = null;
+    rows.forEach(r => {
+      const cells = Array.from(r.cells);
+      if (cells.length > 1 && cells[0].innerText.trim().startsWith('\u25B6')) {
+        if (current) sponsorTables.push(current);
+        current = {
+          sponsor: cells[0].innerText.trim().replace('\u25B6', '').trim(),
+          tables: cells[2] ? cells[2].innerText.trim() : '1',
+          seats: []
+        };
+      } else if (cells.length === 1 && current) {
+        cells[0].innerText.trim().split('\n').forEach(line => {
+          let name = line.replace(/ SPK/g, '').replace(/ ext\./g, '').trim();
+          if (name && name.length > 2 && !name.includes('Empty') && !name.includes('Unnamed') && name !== 'TABLE SEATS') {
+            current.seats.push(name);
+          }
+        });
+      }
+    });
+    if (current) sponsorTables.push(current);
+  }
+
+  // TABLE 3 (index 3): Ticket orgs
+  const t3 = tables[3];
+  if (t3) {
+    const rows = Array.from(t3.rows);
+    let current = null;
+    rows.forEach(r => {
+      const cells = Array.from(r.cells);
+      if (cells.length > 1 && cells[0].innerText.trim().startsWith('\u25B6')) {
+        if (current && current.guests.length > 0) ticketOrgs.push(current);
+        current = {
+          org: cells[0].innerText.trim().replace('\u25B6', '').trim(),
+          guests: []
+        };
+      } else if (cells.length >= 1 && current) {
+        cells[0].innerText.trim().split('\n').forEach(line => {
+          const name = line.trim();
+          if (name && name.length > 2 && !name.includes('Unnamed') && !name.includes('ORGANIZATION') && !name.includes('TOTAL')) {
+            current.guests.push(name);
+          }
+        });
+      }
+    });
+    if (current && current.guests.length > 0) ticketOrgs.push(current);
+  }
+
+  // TABLE 4 (index 4): Speakers
+  const t4 = tables[4];
+  if (t4) {
+    Array.from(t4.rows).slice(1).forEach(r => {
+      const name = r.cells[0] ? r.cells[0].innerText.replace(/ SPK/g, '').replace(/ ext\./g, '').trim() : '';
+      if (name && name.length > 2) speakerNames.add(name);
+    });
+  }
+
+  // Remove ticket-org guests who are already seated at sponsor tables
+  const sponsorSeated = new Set();
+  sponsorTables.forEach(t => t.seats.forEach(n => sponsorSeated.add(n)));
+  ticketOrgs = ticketOrgs.map(o => ({
+    ...o,
+    guests: o.guests.filter(n => !sponsorSeated.has(n))
+  })).filter(o => o.guests.length > 0);
+}
+
+/* ─── Fetch & parse ─── */
+async function fetchDashboard() {
+  setSyncState('loading', 'Syncing with dashboard...');
+  container.innerHTML = '<div class="loading-skeleton"><div class="loading-spinner"></div>Loading guest data from dashboard...</div>';
+
+  try {
+    const resp = await fetch(DASHBOARD_URL, { cache: 'no-store' });
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const html = await resp.text();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+
+    // Reset data
+    sponsorTables = [];
+    ticketOrgs = [];
+    speakerNames = new Set();
+
+    parseDashboard(doc);
+
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+    setSyncState('', `Live from dashboard \u2014 last synced ${timeStr}`);
+    render();
+
+  } catch (err) {
+    console.error('Dashboard fetch failed:', err);
+    setSyncState('error', `Sync failed \u2014 showing cached data`);
+    // Attempt to render whatever we have (could be empty on first load)
+    if (sponsorTables.length === 0) {
+      container.innerHTML = '<div class="loading-skeleton">Could not load dashboard. Please check your connection and refresh.</div>';
+    }
+  }
+}
+
+/* ═══════════ HELPERS ═══════════ */
+function initials(name) {
+  return name.split(' ').filter(w => w).map(w => w[0]).join('').substring(0, 2).toUpperCase();
+}
+
+function photoEl(name) {
+  const handle = photoHandles[name];
+  if (handle) {
+    return `<img class="guest-photo" src="https://unavatar.io/x/${handle}" alt="${name}" onerror="this.outerHTML='<div class=guest-initials>${initials(name)}</div>'" loading="lazy">`;
+  }
+  return `<div class="guest-initials">${initials(name)}</div>`;
+}
+
+function guestTag(name) {
+  if (speakerNames.has(name)) return '<span class="guest-tag speaker">Speaker</span>';
+  for (const t of sponsorTables) {
+    if (t.seats.includes(name)) return '<span class="guest-tag sponsor">Sponsor</span>';
+  }
+  return '<span class="guest-tag ticket">Guest</span>';
+}
+
+function cardHTML(name, org) {
+  return `<div class="guest-card">
+    ${photoEl(name)}
+    <div class="guest-info">
+      <div class="guest-name">${name}</div>
+      <div class="guest-org">${org || ''}</div>
+      ${guestTag(name)}
+    </div>
+  </div>`;
+}
+
+/* ═══════════ RENDER ═══════════ */
+const container = document.getElementById('guestContainer');
+const countEl = document.getElementById('guestCount');
+const searchInput = document.getElementById('searchInput');
+let currentView = 'tables';
+
+function renderTables(query) {
+  let html = '';
+  let total = 0;
+
+  sponsorTables.forEach(t => {
+    const filtered = t.seats.filter(n =>
+      !query || n.toLowerCase().includes(query) || t.sponsor.toLowerCase().includes(query)
+    );
+    if (filtered.length === 0) return;
+    total += filtered.length;
+    html += `<div class="table-group">
+      <div class="table-header">
+        <span class="table-sponsor">${t.sponsor}</span>
+        <span class="table-badge">${t.tables === '0.5' ? 'Half table' : t.tables + ' table'}</span>
+      </div>
+      <div class="table-guests">${filtered.map(n => cardHTML(n, t.sponsor)).join('')}</div>
+    </div>`;
+  });
+
+  let ticketCards = '';
+  let ticketCount = 0;
+  ticketOrgs.forEach(o => {
+    const filtered = o.guests.filter(n =>
+      !query || n.toLowerCase().includes(query) || o.org.toLowerCase().includes(query)
+    );
+    filtered.forEach(n => { ticketCards += cardHTML(n, o.org); ticketCount++; });
+  });
+
+  if (ticketCards) {
+    total += ticketCount;
+    html += `<div class="table-group">
+      <div class="table-header">
+        <span class="table-sponsor">Individual Guests &amp; Ticket Holders</span>
+        <span class="table-badge">${ticketCount} guests</span>
+      </div>
+      <div class="table-guests">${ticketCards}</div>
+    </div>`;
+  }
+
+  countEl.textContent = total + ' guests';
+  container.innerHTML = html;
+}
+
+function renderAll(query) {
+  const allGuests = [];
+  sponsorTables.forEach(t => t.seats.forEach(n => allGuests.push({name: n, org: t.sponsor})));
+  ticketOrgs.forEach(o => o.guests.forEach(n => allGuests.push({name: n, org: o.org})));
+
+  const seen = new Set();
+  const unique = allGuests.filter(g => { if (seen.has(g.name)) return false; seen.add(g.name); return true; });
+  const filtered = unique.filter(g =>
+    !query || g.name.toLowerCase().includes(query) || g.org.toLowerCase().includes(query)
+  ).sort((a, b) => a.name.localeCompare(b.name));
+
+  countEl.textContent = filtered.length + ' guests';
+  container.innerHTML = `<div class="guest-grid">${filtered.map(g => cardHTML(g.name, g.org)).join('')}</div>`;
+}
+
+function render() {
+  const query = searchInput.value.toLowerCase().trim();
+  if (currentView === 'tables') renderTables(query);
+  else renderAll(query);
+}
+
+// View toggle
+document.querySelectorAll('.view-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentView = btn.dataset.view;
+    render();
+  });
+});
+
+searchInput.addEventListener('input', render);
+
+// ── Launch: fetch live data, then auto-refresh every 5 minutes ──
+fetchDashboard();
+setInterval(fetchDashboard, 5 * 60 * 1000);
+
+/* ═══════════ STICKY NAV ═══════════ */
+const topNav = document.getElementById('topNav');
+const heroSection = document.querySelector('.hero');
+const navLinks = document.querySelectorAll('.top-nav-link');
+const sections = document.querySelectorAll('#programme, #guests, #versailles');
+
+// Show/hide nav based on scroll position
+const navObserver = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.target === heroSection) {
+      topNav.classList.toggle('visible', !entry.isIntersecting);
+    }
+  });
+}, { threshold: 0.1 });
+navObserver.observe(heroSection);
+
+// Highlight active section
+const sectionObserver = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      navLinks.forEach(l => l.classList.remove('active'));
+      const active = document.querySelector(`.top-nav-link[data-section="${entry.target.id}"]`);
+      if (active) active.classList.add('active');
+    }
+  });
+}, { threshold: 0.2, rootMargin: '-52px 0px -60% 0px' });
+sections.forEach(s => sectionObserver.observe(s));
+
+// Versailles tabs
+document.querySelectorAll('.v-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.v-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.v-panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('vp-' + tab.dataset.vtab).classList.add('active');
+  });
+});
+</script>
+</body>
+</html>

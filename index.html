@@ -908,7 +908,7 @@ html { scroll-behavior: smooth; }
    ═══════════════════════════════════════════════════ */
 
 const SHEET_ID = '1IuDnVMB4SwjA-6Ei-j_Af4JExCUUKDhHsy4LjkrbO1s';
-const SHEET_CSV = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=0ALL GUESTS`;
+const SHEET_JSONP = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=responseHandler:_sheetCallback&sheet=0ALL%20GUESTS`;
 
 // Photo handles (static — update manually as needed)
 const photoHandles = {
@@ -940,67 +940,43 @@ function setSyncState(state, msg) {
   syncText.textContent = msg;
 }
 
-/* ─── CSV Parser (handles quoted fields with commas) ─── */
-function parseCSV(text) {
-  const rows = [];
-  let current = [];
-  let field = '';
-  let inQuotes = false;
-  for (let i = 0; i < text.length; i++) {
-    const ch = text[i];
-    if (inQuotes) {
-      if (ch === '"' && text[i + 1] === '"') { field += '"'; i++; }
-      else if (ch === '"') { inQuotes = false; }
-      else { field += ch; }
-    } else {
-      if (ch === '"') { inQuotes = true; }
-      else if (ch === ',') { current.push(field); field = ''; }
-      else if (ch === '\n' || (ch === '\r' && text[i + 1] === '\n')) {
-        current.push(field); field = '';
-        if (current.length > 1) rows.push(current);
-        current = [];
-        if (ch === '\r') i++;
-      } else { field += ch; }
-    }
-  }
-  if (field || current.length) { current.push(field); rows.push(current); }
-  return rows;
-}
+/* ─── Parse Google Sheets JSONP data ─── */
+function parseSheetData(data) {
+  if (!data || !data.table) return;
+  const cols = data.table.cols.map(c => c.label.trim().toUpperCase());
+  const rows = data.table.rows;
 
-/* ─── Parse Google Sheets data ─── */
-function parseSheetData(csvText) {
-  const rows = parseCSV(csvText);
-  if (rows.length < 2) return;
-
-  const header = rows[0].map(h => h.trim().toUpperCase());
-  const col = name => header.indexOf(name);
-
+  const col = name => cols.indexOf(name);
   const iType  = col('REGISTRANT TYPE');
   const iRsvp  = col('RSVP STATUS');
   const iTable = col('TABLE NUMBER');
   const iOrg   = col('ORGANIZATION');
   const iName  = col('FULL NAME');
   const iTitle = col('JOB TITLE');
+  const iEmail = col('GUEST EMAIL');
+
+  const v = (row, i) => (row.c && row.c[i] && row.c[i].v != null) ? String(row.c[i].v).trim() : '';
 
   // Temp grouping maps
   const tableMap = {};  // org → {sponsor, tables, seats[]}
   const orgMap = {};    // org → {org, guests[]}
 
-  for (let i = 1; i < rows.length; i++) {
+  for (let i = 0; i < rows.length; i++) {
     const r = rows[i];
-    const name  = (r[iName]  || '').trim();
-    const org   = (r[iOrg]   || '').trim();
-    const rsvp  = (r[iRsvp]  || '').trim();
-    const type  = (r[iType]  || '').trim();
-    const table = (r[iTable] || '').trim();
-    const title = (r[iTitle] || '').trim();
+    const name  = v(r, iName);
+    const org   = v(r, iOrg);
+    const rsvp  = v(r, iRsvp);
+    const type  = v(r, iType);
+    const table = v(r, iTable);
+    const title = v(r, iTitle);
+    const email = v(r, iEmail);
 
     if (!name || name.length < 2) continue;
-    if (rsvp.toLowerCase() === 'declined' || rsvp.toLowerCase() === 'cancelled') continue;
+    if (/declined|cancelled/i.test(rsvp)) continue;
     if (/unnamed/i.test(name)) continue;
 
     // Store metadata for card display
-    guestMeta[name] = { title, rsvp, type, org };
+    guestMeta[name] = { title, rsvp, type, org, email };
 
     // Identify speakers
     if (/speaker/i.test(type)) speakerNames.add(name);
@@ -1010,11 +986,9 @@ function parseSheetData(csvText) {
       if (!tableMap[org]) tableMap[org] = { sponsor: org, tables: '1', seats: [] };
       tableMap[org].seats.push(name);
     } else if (table && org) {
-      // Has a table number — group under that org's table
       if (!tableMap[org]) tableMap[org] = { sponsor: org, tables: '1', seats: [] };
       tableMap[org].seats.push(name);
     } else {
-      // No table assignment — individual guest / ticket holder
       if (!orgMap[org || 'Other']) orgMap[org || 'Other'] = { org: org || 'Other', guests: [] };
       orgMap[org || 'Other'].guests.push(name);
     }
@@ -1024,37 +998,46 @@ function parseSheetData(csvText) {
   ticketOrgs = Object.values(orgMap).filter(o => o.guests.length > 0).sort((a, b) => b.guests.length - a.guests.length);
 }
 
-/* ─── Fetch & parse ─── */
-async function fetchDashboard() {
-  setSyncState('loading', 'Syncing with Google Sheets...');
+/* ─── Fetch via JSONP (bypasses CORS) ─── */
+function fetchDashboard() {
+  setSyncState('loading', 'Syncing with master sheet...');
   container.innerHTML = '<div class="loading-skeleton"><div class="loading-spinner"></div>Loading guest data...</div>';
 
-  try {
-    const resp = await fetch(SHEET_CSV, { cache: 'no-store' });
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    const csvText = await resp.text();
+  // Remove any previous JSONP script
+  const old = document.getElementById('sheetJsonp');
+  if (old) old.remove();
 
-    // Reset data
-    sponsorTables = [];
-    ticketOrgs = [];
-    speakerNames = new Set();
-    guestMeta = {};
+  // Global callback for JSONP
+  window._sheetCallback = function(data) {
+    try {
+      // Reset data
+      sponsorTables = [];
+      ticketOrgs = [];
+      speakerNames = new Set();
+      guestMeta = {};
 
-    parseSheetData(csvText);
+      parseSheetData(data);
 
-    const now = new Date();
-    const timeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-    const total = sponsorTables.reduce((s, t) => s + t.seats.length, 0) + ticketOrgs.reduce((s, o) => s + o.guests.length, 0);
-    setSyncState('', `Live from master sheet \u2014 ${total} guests \u2014 synced ${timeStr}`);
-    render();
-
-  } catch (err) {
-    console.error('Sheet fetch failed:', err);
-    setSyncState('error', `Sync failed \u2014 showing cached data`);
-    if (sponsorTables.length === 0) {
-      container.innerHTML = '<div class="loading-skeleton">Could not load guest data. Please check your connection and refresh.</div>';
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+      const total = sponsorTables.reduce((s, t) => s + t.seats.length, 0)
+                  + ticketOrgs.reduce((s, o) => s + o.guests.length, 0);
+      setSyncState('', `Live from master sheet \u2014 ${total} guests \u2014 synced ${timeStr}`);
+      render();
+    } catch(err) {
+      console.error('Parse error:', err);
+      setSyncState('error', 'Parse error \u2014 please refresh');
     }
-  }
+  };
+
+  const script = document.createElement('script');
+  script.id = 'sheetJsonp';
+  script.src = SHEET_JSONP + '&_t=' + Date.now(); // cache-bust
+  script.onerror = function() {
+    setSyncState('error', 'Could not reach Google Sheets \u2014 please refresh');
+    container.innerHTML = '<div class="loading-skeleton">Could not load guest data. Please check your connection and refresh.</div>';
+  };
+  document.head.appendChild(script);
 }
 
 /* ═══════════ HELPERS ═══════════ */
@@ -1063,11 +1046,18 @@ function initials(name) {
 }
 
 function photoEl(name) {
+  const fallback = `<div class=guest-initials>${initials(name)}</div>`;
+  const onerr = `onerror="this.outerHTML='${fallback.replace(/'/g, "\\'")}'"`;
   const handle = photoHandles[name];
   if (handle) {
-    return `<img class="guest-photo" src="https://unavatar.io/x/${handle}" alt="${name}" onerror="this.outerHTML='<div class=guest-initials>${initials(name)}</div>'" loading="lazy">`;
+    return `<img class="guest-photo" src="https://unavatar.io/x/${handle}" alt="${name}" ${onerr} loading="lazy">`;
   }
-  return `<div class="guest-initials">${initials(name)}</div>`;
+  // Try unavatar.io with guest email (finds Gravatar, Google, social profiles)
+  const meta = guestMeta[name];
+  if (meta && meta.email) {
+    return `<img class="guest-photo" src="https://unavatar.io/${encodeURIComponent(meta.email)}?fallback=false" alt="${name}" ${onerr} loading="lazy">`;
+  }
+  return fallback;
 }
 
 function guestTag(name) {

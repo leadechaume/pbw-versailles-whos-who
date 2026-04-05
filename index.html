@@ -448,6 +448,12 @@ body {
   margin-bottom: 2px;
 }
 
+.guest-title {
+  font-size: 0.7rem;
+  color: var(--gray-light);
+  font-style: italic;
+  line-height: 1.3;
+}
 .guest-org {
   font-size: 0.75rem;
   color: var(--gray);
@@ -901,7 +907,8 @@ html { scroll-behavior: smooth; }
    LIVE DATA — fetched from the VIP Dinner Dashboard
    ═══════════════════════════════════════════════════ */
 
-const DASHBOARD_URL = 'https://leadechaume.github.io/vip-dinner-dashboard/';
+const SHEET_ID = '1IuDnVMB4SwjA-6Ei-j_Af4JExCUUKDhHsy4LjkrbO1s';
+const SHEET_CSV = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=0ALL GUESTS`;
 
 // Photo handles (static — update manually as needed)
 const photoHandles = {
@@ -922,6 +929,7 @@ const photoHandles = {
 let sponsorTables = [];
 let ticketOrgs = [];
 let speakerNames = new Set();
+let guestMeta = {}; // name → {title, rsvp, type, org}
 
 /* ─── Sync UI ─── */
 const syncDot = document.getElementById('syncDot');
@@ -932,132 +940,119 @@ function setSyncState(state, msg) {
   syncText.textContent = msg;
 }
 
-/* ─── Parse dashboard HTML ─── */
-function parseDashboard(doc) {
-  const tables = doc.querySelectorAll('table');
-
-  /* Helper: extract guest names from a drill-row.
-     Dashboard uses <span class="drill-chip"> per guest inside drill-rows.
-     DOMParser doesn't produce \n between inline spans, so we read chips directly
-     and fall back to textContent splitting for forward-compatibility. */
-  function extractNames(cell) {
-    const chips = cell.querySelectorAll('.drill-chip');
-    if (chips.length > 0) {
-      return Array.from(chips).map(c => c.textContent.trim());
+/* ─── CSV Parser (handles quoted fields with commas) ─── */
+function parseCSV(text) {
+  const rows = [];
+  let current = [];
+  let field = '';
+  let inQuotes = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (inQuotes) {
+      if (ch === '"' && text[i + 1] === '"') { field += '"'; i++; }
+      else if (ch === '"') { inQuotes = false; }
+      else { field += ch; }
+    } else {
+      if (ch === '"') { inQuotes = true; }
+      else if (ch === ',') { current.push(field); field = ''; }
+      else if (ch === '\n' || (ch === '\r' && text[i + 1] === '\n')) {
+        current.push(field); field = '';
+        if (current.length > 1) rows.push(current);
+        current = [];
+        if (ch === '\r') i++;
+      } else { field += ch; }
     }
-    // Fallback: split on newlines (in case dashboard structure changes)
-    return cell.textContent.trim().split('\n').map(s => s.trim());
+  }
+  if (field || current.length) { current.push(field); rows.push(current); }
+  return rows;
+}
+
+/* ─── Parse Google Sheets data ─── */
+function parseSheetData(csvText) {
+  const rows = parseCSV(csvText);
+  if (rows.length < 2) return;
+
+  const header = rows[0].map(h => h.trim().toUpperCase());
+  const col = name => header.indexOf(name);
+
+  const iType  = col('REGISTRANT TYPE');
+  const iRsvp  = col('RSVP STATUS');
+  const iTable = col('TABLE NUMBER');
+  const iOrg   = col('ORGANIZATION');
+  const iName  = col('FULL NAME');
+  const iTitle = col('JOB TITLE');
+
+  // Temp grouping maps
+  const tableMap = {};  // org → {sponsor, tables, seats[]}
+  const orgMap = {};    // org → {org, guests[]}
+
+  for (let i = 1; i < rows.length; i++) {
+    const r = rows[i];
+    const name  = (r[iName]  || '').trim();
+    const org   = (r[iOrg]   || '').trim();
+    const rsvp  = (r[iRsvp]  || '').trim();
+    const type  = (r[iType]  || '').trim();
+    const table = (r[iTable] || '').trim();
+    const title = (r[iTitle] || '').trim();
+
+    if (!name || name.length < 2) continue;
+    if (rsvp.toLowerCase() === 'declined' || rsvp.toLowerCase() === 'cancelled') continue;
+    if (/unnamed/i.test(name)) continue;
+
+    // Store metadata for card display
+    guestMeta[name] = { title, rsvp, type, org };
+
+    // Identify speakers
+    if (/speaker/i.test(type)) speakerNames.add(name);
+
+    // Group by table (sponsor tables) vs individual guests
+    if (/sponsor/i.test(type) && org) {
+      if (!tableMap[org]) tableMap[org] = { sponsor: org, tables: '1', seats: [] };
+      tableMap[org].seats.push(name);
+    } else if (table && org) {
+      // Has a table number — group under that org's table
+      if (!tableMap[org]) tableMap[org] = { sponsor: org, tables: '1', seats: [] };
+      tableMap[org].seats.push(name);
+    } else {
+      // No table assignment — individual guest / ticket holder
+      if (!orgMap[org || 'Other']) orgMap[org || 'Other'] = { org: org || 'Other', guests: [] };
+      orgMap[org || 'Other'].guests.push(name);
+    }
   }
 
-  // TABLE 2 (index 2): Sponsor tables with seating
-  const t2 = tables[2];
-  if (t2) {
-    const rows = Array.from(t2.rows);
-    let current = null;
-    rows.forEach(r => {
-      const cells = Array.from(r.cells);
-      const isToggle = r.classList.contains('drill-toggle') ||
-                       (cells.length > 1 && cells[0].textContent.trim().startsWith('\u25B6'));
-      const isDrill  = r.classList.contains('drill-row') ||
-                       (cells.length === 1 && current);
-      if (isToggle) {
-        if (current) sponsorTables.push(current);
-        current = {
-          sponsor: cells[0].textContent.trim().replace('\u25B6', '').trim(),
-          tables: cells[2] ? cells[2].textContent.trim() : '1',
-          seats: []
-        };
-      } else if (isDrill && current) {
-        extractNames(cells[0]).forEach(raw => {
-          let name = raw.replace(/ SPK/g, '').replace(/ ext\./g, '').trim();
-          if (name && name.length > 2 && !name.includes('Empty') && !name.includes('Unnamed')
-              && !/table seats/i.test(name)) {
-            current.seats.push(name);
-          }
-        });
-      }
-    });
-    if (current) sponsorTables.push(current);
-  }
-
-  // TABLE 3 (index 3): Ticket orgs
-  const t3 = tables[3];
-  if (t3) {
-    const rows = Array.from(t3.rows);
-    let current = null;
-    rows.forEach(r => {
-      const cells = Array.from(r.cells);
-      const isToggle = r.classList.contains('drill-toggle') ||
-                       (cells.length > 1 && cells[0].textContent.trim().startsWith('\u25B6'));
-      const isDrill  = r.classList.contains('drill-row') ||
-                       (cells.length === 1 && current);
-      if (isToggle) {
-        if (current && current.guests.length > 0) ticketOrgs.push(current);
-        current = {
-          org: cells[0].textContent.trim().replace('\u25B6', '').trim(),
-          guests: []
-        };
-      } else if (isDrill && current) {
-        extractNames(cells[0]).forEach(raw => {
-          const name = raw.trim();
-          if (name && name.length > 2 && !name.includes('Unnamed')
-              && !name.includes('ORGANIZATION') && !name.includes('TOTAL')) {
-            current.guests.push(name);
-          }
-        });
-      }
-    });
-    if (current && current.guests.length > 0) ticketOrgs.push(current);
-  }
-
-  // TABLE 4 (index 4): Speakers
-  const t4 = tables[4];
-  if (t4) {
-    Array.from(t4.rows).slice(1).forEach(r => {
-      const name = r.cells[0] ? r.cells[0].textContent.replace(/ SPK/g, '').replace(/ ext\./g, '').trim() : '';
-      if (name && name.length > 2) speakerNames.add(name);
-    });
-  }
-
-  // Remove ticket-org guests who are already seated at sponsor tables
-  const sponsorSeated = new Set();
-  sponsorTables.forEach(t => t.seats.forEach(n => sponsorSeated.add(n)));
-  ticketOrgs = ticketOrgs.map(o => ({
-    ...o,
-    guests: o.guests.filter(n => !sponsorSeated.has(n))
-  })).filter(o => o.guests.length > 0);
+  sponsorTables = Object.values(tableMap).sort((a, b) => b.seats.length - a.seats.length);
+  ticketOrgs = Object.values(orgMap).filter(o => o.guests.length > 0).sort((a, b) => b.guests.length - a.guests.length);
 }
 
 /* ─── Fetch & parse ─── */
 async function fetchDashboard() {
-  setSyncState('loading', 'Syncing with dashboard...');
-  container.innerHTML = '<div class="loading-skeleton"><div class="loading-spinner"></div>Loading guest data from dashboard...</div>';
+  setSyncState('loading', 'Syncing with Google Sheets...');
+  container.innerHTML = '<div class="loading-skeleton"><div class="loading-spinner"></div>Loading guest data...</div>';
 
   try {
-    const resp = await fetch(DASHBOARD_URL, { cache: 'no-store' });
+    const resp = await fetch(SHEET_CSV, { cache: 'no-store' });
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    const html = await resp.text();
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, 'text/html');
+    const csvText = await resp.text();
 
     // Reset data
     sponsorTables = [];
     ticketOrgs = [];
     speakerNames = new Set();
+    guestMeta = {};
 
-    parseDashboard(doc);
+    parseSheetData(csvText);
 
     const now = new Date();
     const timeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-    setSyncState('', `Live from dashboard \u2014 last synced ${timeStr}`);
+    const total = sponsorTables.reduce((s, t) => s + t.seats.length, 0) + ticketOrgs.reduce((s, o) => s + o.guests.length, 0);
+    setSyncState('', `Live from master sheet \u2014 ${total} guests \u2014 synced ${timeStr}`);
     render();
 
   } catch (err) {
-    console.error('Dashboard fetch failed:', err);
+    console.error('Sheet fetch failed:', err);
     setSyncState('error', `Sync failed \u2014 showing cached data`);
-    // Attempt to render whatever we have (could be empty on first load)
     if (sponsorTables.length === 0) {
-      container.innerHTML = '<div class="loading-skeleton">Could not load dashboard. Please check your connection and refresh.</div>';
+      container.innerHTML = '<div class="loading-skeleton">Could not load guest data. Please check your connection and refresh.</div>';
     }
   }
 }
@@ -1084,10 +1079,13 @@ function guestTag(name) {
 }
 
 function cardHTML(name, org) {
+  const meta = guestMeta[name] || {};
+  const title = meta.title || '';
   return `<div class="guest-card">
     ${photoEl(name)}
     <div class="guest-info">
       <div class="guest-name">${name}</div>
+      ${title ? `<div class="guest-title">${title}</div>` : ''}
       <div class="guest-org">${org || ''}</div>
       ${guestTag(name)}
     </div>

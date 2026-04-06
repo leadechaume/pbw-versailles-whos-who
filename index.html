@@ -1046,18 +1046,26 @@ function initials(name) {
 }
 
 function photoEl(name) {
-  const fallback = `<div class=guest-initials>${initials(name)}</div>`;
-  const onerr = `onerror="this.outerHTML='${fallback.replace(/'/g, "\\'")}'"`;
+  const meta = guestMeta[name] || {};
+  const ini = initials(name);
+  // Build fallback chain: initials as last resort
+  const initialsFallback = `<div class=guest-initials>${ini}</div>`;
+
+  // If we have a Twitter handle → use it (most reliable)
   const handle = photoHandles[name];
   if (handle) {
-    return `<img class="guest-photo" src="https://unavatar.io/x/${handle}" alt="${name}" ${onerr} loading="lazy">`;
+    return `<img class="guest-photo" src="https://unavatar.io/x/${handle}" alt="${name}" onerror="this.outerHTML='${initialsFallback.replace(/'/g, "\\'")}';" loading="lazy">`;
   }
-  // Try unavatar.io with guest email (finds Gravatar, Google, social profiles)
-  const meta = guestMeta[name];
-  if (meta && meta.email) {
-    return `<img class="guest-photo" src="https://unavatar.io/${encodeURIComponent(meta.email)}?fallback=false" alt="${name}" ${onerr} loading="lazy">`;
+
+  // If we have an email → try unavatar (Gravatar, Google, social profiles)
+  // On error, fall back to company logo, then initials
+  if (meta.email) {
+    const domain = meta.email.split('@').pop();
+    const logoFallback = `<img class=guest-photo src=https://logo.clearbit.com/${domain} alt='${(meta.org||'').replace(/'/g, "\\'")}' onerror="this.outerHTML='${initialsFallback.replace(/'/g, "\\'")}';" loading=lazy>`;
+    return `<img class="guest-photo" src="https://unavatar.io/${encodeURIComponent(meta.email)}?fallback=false" alt="${name}" onerror="this.outerHTML='${logoFallback.replace(/'/g, "\\'")}';" loading="lazy">`;
   }
-  return fallback;
+
+  return initialsFallback;
 }
 
 function guestTag(name) {

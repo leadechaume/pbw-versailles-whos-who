@@ -1047,25 +1047,31 @@ function initials(name) {
 
 function photoEl(name) {
   const meta = guestMeta[name] || {};
-  const ini = initials(name);
-  // Build fallback chain: initials as last resort
-  const initialsFallback = `<div class=guest-initials>${ini}</div>`;
-
-  // If we have a Twitter handle → use it (most reliable)
   const handle = photoHandles[name];
-  if (handle) {
-    return `<img class="guest-photo" src="https://unavatar.io/x/${handle}" alt="${name}" onerror="this.outerHTML='${initialsFallback.replace(/'/g, "\\'")}';" loading="lazy">`;
+  const email = meta.email || '';
+  const domain = email ? email.split('@').pop() : '';
+  // Store fallback data as data attributes; onPhotoError handles the chain
+  const src = handle
+    ? `https://unavatar.io/x/${handle}`
+    : email
+      ? `https://unavatar.io/${encodeURIComponent(email)}?fallback=false`
+      : '';
+  if (src) {
+    return `<img class="guest-photo" src="${src}" alt="${name}" data-domain="${domain}" data-initials="${initials(name)}" onerror="onPhotoError(this)" loading="lazy">`;
   }
+  return `<div class="guest-initials">${initials(name)}</div>`;
+}
 
-  // If we have an email → try unavatar (Gravatar, Google, social profiles)
-  // On error, fall back to company logo, then initials
-  if (meta.email) {
-    const domain = meta.email.split('@').pop();
-    const logoFallback = `<img class=guest-photo src=https://logo.clearbit.com/${domain} alt='${(meta.org||'').replace(/'/g, "\\'")}' onerror="this.outerHTML='${initialsFallback.replace(/'/g, "\\'")}';" loading=lazy>`;
-    return `<img class="guest-photo" src="https://unavatar.io/${encodeURIComponent(meta.email)}?fallback=false" alt="${name}" onerror="this.outerHTML='${logoFallback.replace(/'/g, "\\'")}';" loading="lazy">`;
+// Fallback chain: unavatar → company logo → initials
+function onPhotoError(img) {
+  const domain = img.dataset.domain;
+  const ini = img.dataset.initials;
+  if (domain && !img.dataset.triedLogo) {
+    img.dataset.triedLogo = '1';
+    img.src = 'https://logo.clearbit.com/' + domain;
+  } else {
+    img.outerHTML = '<div class="guest-initials">' + ini + '</div>';
   }
-
-  return initialsFallback;
 }
 
 function guestTag(name) {

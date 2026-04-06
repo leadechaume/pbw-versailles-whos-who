@@ -954,6 +954,7 @@ function parseSheetData(data) {
   const iName  = col('FULL NAME');
   const iTitle = col('JOB TITLE');
   const iEmail = col('GUEST EMAIL');
+  const iPhoto = col('PHOTO URL');
 
   const v = (row, i) => (row.c && row.c[i] && row.c[i].v != null) ? String(row.c[i].v).trim() : '';
 
@@ -970,13 +971,14 @@ function parseSheetData(data) {
     const table = v(r, iTable);
     const title = v(r, iTitle);
     const email = v(r, iEmail);
+    const photo = v(r, iPhoto);
 
     if (!name || name.length < 2) continue;
     if (/declined|cancelled/i.test(rsvp)) continue;
     if (/unnamed/i.test(name)) continue;
 
     // Store metadata for card display
-    guestMeta[name] = { title, rsvp, type, org, email };
+    guestMeta[name] = { title, rsvp, type, org, email, photo };
 
     // Identify speakers
     if (/speaker/i.test(type)) speakerNames.add(name);
@@ -1050,16 +1052,21 @@ function photoEl(name) {
   const handle = photoHandles[name];
   const email = meta.email || '';
   const domain = email ? email.split('@').pop() : '';
-  // Store fallback data as data attributes; onPhotoError handles the chain
-  const src = handle
-    ? `https://unavatar.io/x/${handle}`
-    : email
-      ? `https://unavatar.io/${encodeURIComponent(email)}?fallback=false`
-      : '';
-  if (src) {
-    return `<img class="guest-photo" src="${src}" alt="${name}" data-domain="${domain}" data-initials="${initials(name)}" onerror="onPhotoError(this)" loading="lazy">`;
+  const ini = initials(name);
+
+  // Priority 1: Photo URL from Google Sheet
+  if (meta.photo) {
+    return `<img class="guest-photo" src="${meta.photo}" alt="${name}" data-domain="${domain}" data-initials="${ini}" onerror="onPhotoError(this)" loading="lazy">`;
   }
-  return `<div class="guest-initials">${initials(name)}</div>`;
+  // Priority 2: Twitter handle
+  if (handle) {
+    return `<img class="guest-photo" src="https://unavatar.io/x/${handle}" alt="${name}" data-domain="${domain}" data-initials="${ini}" onerror="onPhotoError(this)" loading="lazy">`;
+  }
+  // Priority 3: Email lookup via unavatar
+  if (email) {
+    return `<img class="guest-photo" src="https://unavatar.io/${encodeURIComponent(email)}?fallback=false" alt="${name}" data-domain="${domain}" data-initials="${ini}" onerror="onPhotoError(this)" loading="lazy">`;
+  }
+  return `<div class="guest-initials">${ini}</div>`;
 }
 
 // Fallback chain: unavatar → company logo → initials
